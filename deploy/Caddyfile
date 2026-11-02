@@ -1,0 +1,14 @@
+# HTTPS in front of the service. SITE_ADDRESS is the host name in PUBLIC_ORIGIN: your domain, or <ip>.sslip.io when
+# you have none, which resolves to the server's IP address so Let's Encrypt can issue a certificate for it.
+{$SITE_ADDRESS} {
+	encode gzip
+	request_body {
+		max_size 11MB
+	}
+	reverse_proxy app:8787 {
+		# A held create-job can take up to 30 seconds [J9].
+		transport http {
+			read_timeout 120s
+		}
+	}
+}

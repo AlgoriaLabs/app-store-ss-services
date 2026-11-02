@@ -1,0 +1,34 @@
+# The service and Caddy, which serves it over HTTPS with a certificate from Let's Encrypt. infra/terraform copies this
+# folder and the source to the server and runs `docker compose up -d --build`. The .env next to this file holds the
+# settings, written by Terraform from your variables.
+
+services:
+  app:
+    build:
+      context: ..
+    env_file: .env
+    volumes:
+      - data:/data
+    restart: unless-stopped
+    # Chromium uses shared memory for big pages.
+    shm_size: 1gb
+    expose:
+      - "8787"
+
+  caddy:
+    image: caddy:2.10
+    # No depends_on: Caddy starts on its own before the first launch, and retries the app until it answers.
+    ports:
+      - "80:80"
+      - "443:443"
+    env_file: .env
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    restart: unless-stopped
+
+volumes:
+  data:
+  caddy_data:
+  caddy_config:

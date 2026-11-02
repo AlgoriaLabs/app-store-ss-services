@@ -1,0 +1,9 @@
+.git
+node_modules/
+.env
+.env.*
+jobs.sqlite*
+dist/
+data/
+out/
+infra/

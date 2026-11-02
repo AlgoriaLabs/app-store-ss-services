@@ -1,0 +1,37 @@
+{
+  "name": "app-store-ss-services",
+  "version": "0.1.0",
+  "private": true,
+  "description": "App Store screenshot generator for iOS apps: panoramic and 3D device mockups with AI-written headlines, from a GitHub repository and 5 screenshots. A paid service on Stellar mainnet.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc && provider-kit dev -- node --disable-warning=ExperimentalWarning dist/server.js",
+    "generate": "tsc && node --env-file-if-exists=.env dist/cli.js",
+    "check": "provider-kit check --manifest http://localhost:8787/.well-known/stellar-agent-services.json --dev",
+    "status": "provider-kit status",
+    "launch": "tsc && provider-kit launch --start \"node --disable-warning=ExperimentalWarning dist/server.js\" --no-deploy",
+    "deploy": "sh scripts/deploy-oracle.sh",
+    "test": "tsc && node --test dist/test/*.test.js",
+    "start": "node --env-file-if-exists=.env --disable-warning=ExperimentalWarning dist/server.js"
+  },
+  "dependencies": {
+    "@fontsource/inter": "5.3.0",
+    "@stellar-agent-services/provider-kit": "0.1.0",
+    "fflate": "0.8.3",
+    "playwright-core": "1.63.0",
+    "sharp": "0.35.5"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "typescript": "6.0.3"
+  },
+  "overrides": {
+    "@trionlabs/stellar8004": {
+      "@stellar/stellar-sdk": "16.4.1"
+    }
+  }
+}
