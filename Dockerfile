@@ -28,6 +28,8 @@ RUN npx playwright-core install --with-deps --only-shell chromium \
  && rm -rf /var/lib/apt/lists/* \
  && chmod -R a+rx /ms-playwright
 COPY --from=build /app/dist ./dist
+# Files can arrive owner-only (mode 600): the service runs as the node user and must read them.
+RUN chmod -R a+rX /app
 RUN mkdir -p /data && chown node:node /data
 VOLUME /data
 EXPOSE 8787

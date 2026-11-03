@@ -29,7 +29,16 @@ locals {
   is_arm      = can(regex("A1", var.shape))
   site        = var.domain != "" ? var.domain : "${replace(oci_core_instance.app.public_ip, ".", "-")}.sslip.io"
   origin      = "https://${local.site}"
-  source_hash = sha1(join("", [for file in sort(fileset(local.root, "{src/**,deploy/**,package.json,package-lock.json,tsconfig.json,Dockerfile,.dockerignore}")) : filesha1("${local.root}/${file}")]))
+  source_files = setunion(
+    fileset(local.root, "src/**"),
+    fileset(local.root, "deploy/**"),
+    fileset(local.root, "package.json"),
+    fileset(local.root, "package-lock.json"),
+    fileset(local.root, "tsconfig.json"),
+    fileset(local.root, "Dockerfile"),
+    fileset(local.root, ".dockerignore"),
+  )
+  source_hash = sha1(join("", [for file in sort(local.source_files) : filesha1("${local.root}/${file}")]))
   env_file = join("\n", [
     "# Written by Terraform (infra/terraform). Change variables and apply again rather than editing this file.",
     "SITE_ADDRESS=${local.site}",
@@ -43,6 +52,8 @@ locals {
     "LLM_BASE_URL=${var.llm_base_url}",
     "LLM_API_KEY=${var.llm_api_key}",
     "LLM_MODEL=${var.llm_model}",
+    "LLM_FALLBACK_MODEL=${var.llm_fallback_model}",
+    "LLM_REASONING_EFFORT=${var.llm_reasoning_effort}",
     "LLM_VISION=${var.llm_vision}",
     "GITHUB_TOKEN=${var.github_token}",
     "RENDER_CONCURRENCY=${var.render_concurrency}",
@@ -196,12 +207,18 @@ resource "terraform_data" "deploy" {
   provisioner "local-exec" {
     working_dir = local.root
     environment = { COPYFILE_DISABLE = "1" } # macOS tar: no ._ resource files
-    command     = "mkdir -p infra/terraform/.build && tar --exclude='./node_modules' --exclude='./dist' --exclude='./data' --exclude='./out' --exclude='./infra' --exclude='./.git' --exclude='./.env' --exclude='./.env.*' --exclude='./jobs.sqlite*' -czf infra/terraform/.build/app.tar.gz ."
+    command     = "mkdir -p infra/terraform/.build && tar --no-xattrs --exclude='./node_modules' --exclude='./dist' --exclude='./data' --exclude='./out' --exclude='./infra' --exclude='./.git' --exclude='./.env' --exclude='./.env.*' --exclude='./jobs.sqlite*' -czf infra/terraform/.build/app.tar.gz ."
   }
 
   provisioner "remote-exec" {
     inline = [
       "cloud-init status --wait > /dev/null || true",
+      # Docker and the firewall, in case first boot (cloud-init) didn't finish them. Safe to run again.
+      "command -v docker > /dev/null || (sudo apt-get update -q && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -q docker.io docker-compose-v2)",
+      "docker compose version > /dev/null 2>&1 || sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -q docker-compose-v2",
+      "sudo systemctl enable --now docker",
+      "for port in 80 443; do sudo iptables -C INPUT -p tcp --dport $port -j ACCEPT 2>/dev/null || sudo iptables -I INPUT 1 -p tcp --dport $port -j ACCEPT; done",
+      "command -v netfilter-persistent > /dev/null && sudo netfilter-persistent save > /dev/null 2>&1 || true",
       "sudo mkdir -p /opt/app && sudo chown ubuntu:ubuntu /opt/app",
     ]
   }

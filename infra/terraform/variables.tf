@@ -137,6 +137,16 @@ variable "llm_model" {
   default = "gemini-3.1-flash-lite"
 }
 
+variable "llm_fallback_model" {
+  type    = string
+  default = "gemini-3.5-flash-lite"
+}
+
+variable "llm_reasoning_effort" {
+  type    = string
+  default = "low"
+}
+
 variable "llm_vision" {
   type    = string
   default = "true"

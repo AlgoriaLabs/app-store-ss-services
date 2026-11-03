@@ -76,6 +76,13 @@ dev` and `npm run check`. To try paid calls with test money first, set `STELLAR_
 
 ## Go live on mainnet (Oracle Cloud)
 
+**One command:** `npm run go-live` (on your own computer, with the OCI CLI set up). It fills in `.env` and
+`infra/terraform/terraform.tfvars` itself (tenancy and region from `~/.oci/config`), makes an SSH key for the server,
+creates the server, opens your wallet once to register the service, starts it and checks it. It asks only for the
+Gemini key (or reads `GEMINI_API_KEY`), the OpenZeppelin facilitator key (it opens the page that gives one) and your
+wallet's approval. It is safe to run again. The steps it runs, by hand:
+
+
 You need: an [Oracle Cloud](https://www.oracle.com/cloud/free/) account with the
 [OCI CLI configured](https://docs.oracle.com/en-us/iaas/Content/API/SDKDocs/cliinstall.htm) (`oci setup config`),
 [Terraform](https://developer.hashicorp.com/terraform/install) or OpenTofu, an SSH key, a Stellar wallet (Freighter,

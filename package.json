@@ -16,7 +16,8 @@
     "launch": "tsc && provider-kit launch --start \"node --disable-warning=ExperimentalWarning dist/server.js\" --no-deploy",
     "deploy": "sh scripts/deploy-oracle.sh",
     "test": "tsc && node --test dist/test/*.test.js",
-    "start": "node --env-file-if-exists=.env --disable-warning=ExperimentalWarning dist/server.js"
+    "start": "node --env-file-if-exists=.env --disable-warning=ExperimentalWarning dist/server.js",
+    "go-live": "sh scripts/go-live.sh"
   },
   "dependencies": {
     "@fontsource/inter": "5.3.0",

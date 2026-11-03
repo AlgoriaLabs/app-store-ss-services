@@ -35,6 +35,10 @@ export const config = {
     baseUrl: text("LLM_BASE_URL", "https://generativelanguage.googleapis.com/v1beta/openai"),
     apiKey: text("LLM_API_KEY"),
     model: text("LLM_MODEL", "gemini-3.1-flash-lite"),
+    /** Tried when the model is busy (429 or 5xx), such as Gemini's "high demand" answers. Empty: none. */
+    fallbackModel: text("LLM_FALLBACK_MODEL", text("LLM_BASE_URL").includes("googleapis") || !process.env["LLM_BASE_URL"] ? "gemini-3.5-flash-lite" : ""),
+    /** Sent as reasoning_effort: thinking models answer in 1-3 s at "low". Empty: not sent, for APIs without it. */
+    reasoningEffort: text("LLM_REASONING_EFFORT", text("LLM_BASE_URL").includes("googleapis") || !process.env["LLM_BASE_URL"] ? "low" : ""),
     /** Send small thumbnails of the screenshots, so headlines match what each screen shows. */
     vision: text("LLM_VISION", "true") !== "false",
     timeoutMs: number("LLM_TIMEOUT_MS", 30_000),

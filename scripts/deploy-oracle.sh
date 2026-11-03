@@ -18,7 +18,8 @@ value() { [ -f .env ] && sed -n "s/^$1=//p" .env | tail -n 1 | sed 's/^"\(.*\)"$
 export TF_VAR_pay_to="$(value PAY_TO)"
 export TF_VAR_agent_id="$(value AGENT_ID)"
 for pair in stellar_network:STELLAR_NETWORK facilitator_auth:FACILITATOR_AUTH soroban_rpc_url:SOROBAN_RPC_URL \
-  price_usdc:PRICE_USDC llm_base_url:LLM_BASE_URL llm_api_key:LLM_API_KEY llm_model:LLM_MODEL llm_vision:LLM_VISION \
+  price_usdc:PRICE_USDC llm_base_url:LLM_BASE_URL llm_api_key:LLM_API_KEY llm_model:LLM_MODEL llm_fallback_model:LLM_FALLBACK_MODEL \
+  llm_reasoning_effort:LLM_REASONING_EFFORT llm_vision:LLM_VISION \
   github_token:GITHUB_TOKEN render_concurrency:RENDER_CONCURRENCY retention_seconds:RETENTION_SECONDS; do
   var="${pair%%:*}"; key="${pair#*:}"; v="$(value "$key")"
   [ -n "$v" ] && export "TF_VAR_$var=$v"
